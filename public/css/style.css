@@ -1,0 +1,65 @@
+body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+#map {
+    height: 90vh;
+    width: 100vw;
+}
+
+section {
+    height: 5vh;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+  
+th, td {
+    text-align: left;
+    padding: 8px;
+}
+  
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
+
+.flex-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    background-color: white;
+}
+
+.flex-container button {
+    text-align: center;
+    font-size: 30px;
+    min-width: 100px;
+    height: 5vh;
+    background-color: white;
+    /* border-left: 2px solid black; */
+}
+
+.flex-container button.active {
+    background-color: lightgray;
+}
+
+.flex-container button:hover {
+    background-color: silver;
+}
+
+.flex-container button.last {
+    margin-left: auto;
+}
+
+p span {
+    color:navy;
+    font-weight: 400;
+}

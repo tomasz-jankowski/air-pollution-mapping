@@ -1,0 +1,161 @@
+<% include ./partials/header %>
+
+<nav class="flex-container">
+    <button class="active item" id="pm1">PM1</button>
+    <button class="item" id="pm25">PM2.5</button c>
+    <button class="item" id="pm4">PM4</button>
+    <button class="item" id="pm10">PM10</button>
+    <button class="item" id="so2">SO<sub>2</sub></button>
+    <button class="item" id="hcho">HCHO</button>
+    <button class="last" onclick="window.location.href='/debug'">Dane pomiarowe</button>
+</nav>
+
+<div id="map"></div>
+    
+<script type='text/javascript'>
+
+    var points = <%- JSON.stringify(data) %>;
+    var markers = [];
+    var infowindows = [];
+    var dust = 'pm1';
+    var map;
+    var inits = 0;
+
+    function getColor(value, limit) {
+        var red = 255,
+            green = 255;
+        limit < 50 ? value >= 49 ? value = 99 : false : value >= 100 ? value = 99 : false;
+        value < limit ? red = Math.floor((value / 50) * 255) : green = Math.floor(((50 - value % 50) * 255 / 50));
+        return `rgb(${red}, ${green}, 0)`
+    }
+
+    function markerOptions(value) {
+        var limit, color;
+        switch(dust) {
+            case 'pm1': limit = 20; color = getColor(value.pm1, limit); break;
+            case 'pm25': limit = 25; color = getColor(value.pm25, limit); break;
+            case 'pm4': limit = 25; color = getColor(value.pm4, limit); break;
+            case 'pm10': limit = 50; color = getColor(value.pm10, limit); break;
+            case 'so2': limit = 20; color = getColor(value.so2, limit); break;
+            case 'hcho': limit = 25; color = getColor(value.hcho, limit); break;
+            default: limit=0;
+        }
+        var d = new Date(value.date);
+        var dn = new Date();
+        diff = dn.getHours() - d.getHours();
+
+        var options = {
+            path: google.maps.SymbolPath.CIRCLE,
+            strokeWeight: 1,
+            fillColor: color,
+            //strokeOpacity: (24-diff)/24,
+            strokeOpacity: 0,
+            fillOpacity: (24-diff)/24,
+            clickable: true,
+            scale: 15
+        }
+        return options;
+    }
+
+    function initMap() {
+
+        // Set map options
+        var mapOptions = {
+            zoom: 14,
+            center: {lat: 52.4033464, lng: 16.9271018},
+            mapTypeId: 'roadmap',
+            disableDefaultUI: true,
+            zoomControl: true,
+            styles:[{
+                featureType: 'poi',
+                elementType: 'labels',
+                stylers: [{
+                    visibility: 'off'
+                }]
+            }]
+        }
+
+        // Create the map with set options
+        map = new google.maps.Map(document.getElementById('map'), mapOptions);
+        inits++;
+        
+        points.forEach(point => {
+            var d = new Date(point.date);
+            var dn = new Date();
+            var diff = (dn.getTime() - d.getTime()) / 864e5;
+            if(diff >= 0 && diff <= 1) {
+                var marker = new google.maps.Marker({
+                position: new google.maps.LatLng(point.gps.lat, point.gps.lng),
+                map: map,
+                dust: {
+                    pm1: point.pm1,
+                    pm25: point.pm25,
+                    pm4: point.pm4,
+                    pm10: point.pm10,
+                    so2: point.so2,
+                    hcho: point.hcho,
+                },
+                id: point._id,
+                date: point.date,
+                gps: {
+                    lat: point.gps.lat,
+                    lng: point.gps.lng
+                },
+                icon: markerOptions(point)
+                });
+                markers.push(marker);
+            }
+        });
+
+        var markerCluster = new MarkerClusterer(map, markers, {
+            imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m',
+            gridSize: 30
+        });
+
+        if (markers.length > 0 && inits === 1) {
+            var bounds = new google.maps.LatLngBounds();
+            for (var i = 0; i < markers.length; i++) {
+                bounds.extend(markers[i].position);
+            }
+            map.fitBounds(bounds);
+        }
+
+        markers.forEach(marker => {
+            marker.info = new google.maps.InfoWindow({
+                content: `
+                    <p><span>ID pomiaru:</span> ${marker.id}</p>
+                    <p><span>Data pomiaru:</span> ${marker.date}</p>
+                    <p><span>PM1:</span> ${marker.dust.pm1} &#181g/m<sup>3</sup></p>
+                    <p><span>PM2,5:</span> ${marker.dust.pm25} &#181g/m<sup>3</sup></p>
+                    <p><span>PM4:</span> ${marker.dust.pm4} &#181g/m<sup>3</sup></p>
+                    <p><span>PM10:</span> ${marker.dust.pm10} &#181g/m<sup>3</sup></p>
+                    <p><span>SO<sub>2</sub>:</span> ${marker.dust.so2} &#181g/m<sup>3</sup></p>
+                    <p><span>HCHO:</span> ${marker.dust.hcho} &#181g/m<sup>3</sup></p>
+                    `
+            });
+            google.maps.event.addListener(marker, 'click', function() {
+                markers.forEach(marker => {
+                    marker.info.close();
+                });
+                marker.info.open(map, marker);
+            });
+        });
+    }
+
+    $(document).on('click', 'nav .item', function() {
+        $('.item').removeClass('active');
+        $(this).addClass("active");
+        dust = $(this).attr('id');
+        markers.forEach(marker => {
+            marker.setMap(null);
+        });
+        markers.length = 0;
+        initMap();
+    });
+</script>
+
+<script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=APIKEY&callback=initMap" type="text/javascript"></script>
+<script src="https://assets.what3words.com/sdk/v3/what3words.js?key=OEPUQWA9"></script>
+
+<% include ./partials/footer %>

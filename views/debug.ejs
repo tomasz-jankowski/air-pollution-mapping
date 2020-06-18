@@ -1,0 +1,77 @@
+<% include ./partials/header %>
+
+<nav class="flex-container">
+    <button onclick="window.location.href='/'">Mapa zanieczyszczeń</button>
+</nav>
+
+<table id="myTable" class="table table-hover tablesorter">
+    <thead>
+        <tr>
+            <th>no.</th>
+            <th>_id</th>
+            <th>gps</th>
+            <!-- <th>date</th> -->
+            <th>pm1</th>
+            <th>pm25</th>
+            <th>pm4</th>
+            <th>pm10</th>
+            <th>so2</th>
+            <th>hcho</th>
+            <th>dateReceived</th>
+        </tr>
+    </thead>
+    <tbody> 
+        <% for(let i=0, j=data.length; i < data.length; i++, j--) { %>
+        <tr>
+            <td><%= j %></th>
+            <td><%= data[i]._id %></td>
+            <td><a href="https://www.google.com/maps/place/<%=parseFloat(data[i].gps.lat)%>,<%=parseFloat(data[i].gps.lng)%>" target="_blank"><%= data[i].gps %></a></td>
+            <!-- <td><%= data[i].date %></td> -->
+            <td class="pm1"><%= data[i].pm1 %></td>
+            <td class="pm25"><%= data[i].pm25 %></td>
+            <%= data[i].pm4 %><td class="pm10"><%= data[i].pm10 %></td>
+            <td class="so2"><%= data[i].so2 %></td>
+            <td class="hcho"><%= data[i].hcho %></td>
+            <td><%= data[i].dateReceived %></td>
+        </tr>
+        <% } %>
+    </tbody>
+</table>
+
+<script>
+    function getColor(value, limit) {
+        var red = 255,
+            green = 255;
+        limit < 50 ? value >= 49 ? value = 99 : false : value >= 100 ? value = 99 : false;
+        value < limit ? red = Math.floor((value / 50) * 255) : green = Math.floor(((50 - value % 50) * 255 / 50));
+        return `rgb(${red}, ${green}, 0, 0.25)`
+    }
+
+    var t = document.getElementById("myTable");
+    for (var r = 0; r < t.rows.length; r++) {
+        for (var c = 0; c < t.rows[r].cells.length; c++) {
+            if(c !== 0)
+            {
+                if(t.rows[r].cells[c].className == 'pm1' || t.rows[r].cells[c].className == 'so2')
+                    t.rows[r].cells[c].style.backgroundColor = getColor(t.rows[r].cells[c].innerHTML, 20);
+
+                if(t.rows[r].cells[c].className == 'pm25' || t.rows[r].cells[c].className == 'pm4' || t.rows[r].cells[c].className == 'hcho')
+                    t.rows[r].cells[c].style.backgroundColor = getColor(t.rows[r].cells[c].innerHTML, 25);
+
+                if(t.rows[r].cells[c].className == 'pm10')
+                    t.rows[r].cells[c].style.backgroundColor = getColor(t.rows[r].cells[c].innerHTML, 50);
+            }
+        }
+    }
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/js/jquery.tablesorter.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/js/jquery.tablesorter.widgets.min.js"></script>
+
+<script>
+    $(function() {
+  $("#myTable").tablesorter();
+});
+</script>
+
+<% include ./partials/footer %>
