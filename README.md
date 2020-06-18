@@ -1,4 +1,4 @@
-### thesis-air-pollution-mapping
+### air-pollution-mapping-thesis
 Web application used to gather measurements from previously designed mobile measuring module attachable to a drone which generates a map of air pollution concentrations represented with appropriate colors.
 
 [![Generic badge](https://img.shields.io/badge/node-12.18.0-darkgreen.svg)](https://shields.io/)   [![Generic badge](https://img.shields.io/badge/npm-6.14.4-red.svg)](https://shields.io/) [![License](http://img.shields.io/:license-All_Rights_Reserved-blue.svg?style=flat-square)](http://badges.mit-license.org)
