@@ -9,7 +9,7 @@
   "author": "Tomasz Jankowski",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "coordinates-conversion": "0.0.1-alpha.1",
     "ejs": "^2.7.4",
     "express": "^4.17.1",
